@@ -1,0 +1,24 @@
+.layout {
+  display: flex;
+  height: 70vh;
+}
+
+.canvas {
+  flex: 3;
+  border-right: 1px solid #ddd;
+}
+
+.sidebar {
+  flex: 1;
+  padding: 16px;
+  background: #f9f9f9;
+}
+
+.json {
+  height: 30vh;
+  overflow: auto;
+  background: #1e1e1e;
+  color: #fff;
+  padding: 16px;
+  font-family: monospace;
+}
