@@ -1,12 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { Validation } from '../../core/validation';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { FlowService } from '../../core/flow.service.ts';
 
 @Component({
   selector: 'app-json-preview',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   template: `
     @if (errors.length > 0) {
       <div class="validation">
@@ -18,6 +19,15 @@ import { FlowService } from '../../core/flow.service.ts';
         </ul>
       </div>
     }
+
+    <div class="import-section">
+      <textarea
+        placeholder="Paste JSON here to import..."
+        [(ngModel)]="importText"
+        rows="5"
+      ></textarea>
+      <button (click)="importJson()">Import JSON</button>
+    </div>
 
     <div class="json-actions">
       <button (click)="copyJson()">Copy JSON</button>
@@ -52,6 +62,7 @@ export class JsonPreview implements OnInit {
 
   json = '';
   errors: string[] = [];
+  importText = '';
 
   constructor(
     private flowService: FlowService,
@@ -83,5 +94,22 @@ export class JsonPreview implements OnInit {
     a.click();
 
     URL.revokeObjectURL(url);
+  }
+
+  importJson() {
+    try {
+      const parsed = JSON.parse(this.importText);
+
+      if (!Array.isArray(parsed)) {
+        alert('Invalid format: JSON must be an array of nodes.');
+        return;
+      }
+
+      this.flowService.setNodes(parsed);
+      this.importText = '';
+
+    } catch (err) {
+      alert('Invalid JSON format.');
+    }
   }
 }

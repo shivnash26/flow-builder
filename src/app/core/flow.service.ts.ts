@@ -92,4 +92,9 @@ export class FlowService {
   getNodesSnapshot(): NodeModel[] {
     return this.nodesSubject.value;
   }
+
+  setNodes(nodes: NodeModel[]) {
+    this.nodesSubject.next(nodes);
+    this.selectedNodeSubject.next(null);
+  }
 }
