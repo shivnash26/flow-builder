@@ -19,6 +19,11 @@ import { FlowService } from '../../core/flow.service.ts';
       </div>
     }
 
+    <div class="json-actions">
+      <button (click)="copyJson()">Copy JSON</button>
+      <button (click)="downloadJson()">Download JSON</button>
+    </div>
+
     <pre>{{ json }}</pre>
   `,
   styles: [`
@@ -33,6 +38,13 @@ import { FlowService } from '../../core/flow.service.ts';
     pre {
       white-space: pre-wrap;
       word-break: break-word;
+    }
+    .json-actions {
+      margin-bottom: 10px;
+    }
+
+    .json-actions button {
+      margin-right: 10px;
     }
   `]
 })
@@ -55,5 +67,21 @@ export class JsonPreview implements OnInit {
 
       this.json = JSON.stringify(nodes, null, 2);
     });
+  }
+
+  copyJson() {
+    navigator.clipboard.writeText(this.json);
+  }
+
+  downloadJson() {
+    const blob = new Blob([this.json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'flow.json';
+    a.click();
+
+    URL.revokeObjectURL(url);
   }
 }

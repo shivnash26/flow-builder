@@ -73,13 +73,16 @@ export class FlowService {
     this.selectedNodeSubject.next(stored);
   }
 
-  deleteNode(nodeId: string) {
-    const filtered = this.nodesSubject.value.filter(n => n.id !== nodeId);
+  deleteNode(uid: string) {
 
-    // Also remove edges pointing to this node
+    const filtered = this.nodesSubject.value.filter(n => n.uid !== uid);
+
+    // Remove edges pointing to deleted node
     const cleaned = filtered.map(node => ({
       ...node,
-      edges: node.edges.filter(e => e.to_node_id !== nodeId)
+      edges: node.edges.filter(e =>
+        e.to_node_id !== this.nodesSubject.value.find(n => n.uid === uid)?.id
+      )
     }));
 
     this.nodesSubject.next(cleaned);

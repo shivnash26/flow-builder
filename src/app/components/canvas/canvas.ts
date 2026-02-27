@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { NodeModel } from '../../models/flow.model';
 import { CommonModule } from '@angular/common';
 import { CdkDrag, CdkDragEnd } from '@angular/cdk/drag-drop';
@@ -96,6 +96,7 @@ export class Canvas implements OnInit {
 
   nodes: NodeModel[] = [];
   computedEdges: any[] = [];
+  selectedNode: NodeModel | null = null;
 
   constructor(private flowService: FlowService) {}
 
@@ -111,6 +112,7 @@ export class Canvas implements OnInit {
   }
 
   selectNode(node: NodeModel) {
+    this.selectedNode = node;
     this.flowService.selectNode(node);
   }
 
@@ -158,5 +160,15 @@ export class Canvas implements OnInit {
     });
 
     this.computedEdges = edges;
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  handleKeyDown(event: KeyboardEvent) {
+
+    if (event.key === 'Delete' && this.selectedNode) {
+      this.flowService.deleteNode(this.selectedNode.uid);
+      this.selectedNode = null;
+    }
+
   }
 }
