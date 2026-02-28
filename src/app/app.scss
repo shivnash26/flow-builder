@@ -1,24 +1,44 @@
-.layout {
-  display: flex;
-  height: 70vh;
+/* Root layout */
+.app-layout {
+  display: grid;
+  grid-template-columns: 1fr 350px;   /* Canvas | Sidebar */
+  grid-template-rows: 1fr 260px;      /* Main | JSON */
+  height: 100vh;
+  gap: 8px;
+  padding: 8px;
+  box-sizing: border-box;
 }
 
-.canvas {
-  flex: 3;
-  border-right: 1px solid #ddd;
+/* Canvas section */
+.canvas-area {
+  grid-column: 1;
+  grid-row: 1;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  overflow: hidden;
+  background: #fafafa;
 }
 
-.sidebar {
-  flex: 1;
-  padding: 16px;
+/* Sidebar section */
+.sidebar-area {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  border-radius: 12px;
   background: #f9f9f9;
+  padding: 16px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
 }
 
-.json {
-  height: 30vh;
-  overflow: auto;
+/* JSON preview section */
+.json-area {
+  grid-column: 1;
+  grid-row: 2;
+  border-radius: 12px;
   background: #1e1e1e;
   color: #fff;
   padding: 16px;
+  overflow: auto;
   font-family: monospace;
+  border: 1px solid #111;
 }

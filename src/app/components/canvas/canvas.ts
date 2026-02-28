@@ -17,13 +17,27 @@ import { FlowService } from '../../core/flow.service.ts';
 
       <!-- SVG Edges -->
       <svg class="edges">
-        @for (edge of computedEdges;  track edge.id) {
-          <line
-            [attr.x1]="edge.x1"
-            [attr.y1]="edge.y1"
-            [attr.x2]="edge.x2"
-            [attr.y2]="edge.y2"
+        <defs>
+          <marker id="arrow"
+                  markerWidth="10"
+                  markerHeight="10"
+                  refX="8"
+                  refY="3"
+                  orient="auto"
+                  markerUnits="strokeWidth">
+            <path d="M0,0 L0,6 L9,3 z" fill="#000" />
+          </marker>
+        </defs>
+
+        @for (edge of computedEdges; track edge.id) {
+          <path
+            [attr.d]="'M ' + edge.x1 + ' ' + edge.y1 +
+                      ' C ' + (edge.x1 + edge.x2)/2 + ' ' + edge.y1 +
+                      ', ' + (edge.x1 + edge.x2)/2 + ' ' + edge.y2 +
+                      ', ' + edge.x2 + ' ' + edge.y2"
             stroke="black"
+            fill="none"
+            marker-end="url(#arrow)"
           />
           <text
             [attr.x]="(edge.x1 + edge.x2) / 2"
@@ -34,6 +48,7 @@ import { FlowService } from '../../core/flow.service.ts';
             {{ edge.label }}
           </text>
         }
+
       </svg>
 
       <!-- Nodes -->
@@ -45,6 +60,7 @@ import { FlowService } from '../../core/flow.service.ts';
           [cdkDragFreeDragPosition]="{ x: node.x, y: node.y }"
           (cdkDragEnded)="dragEnded($event, node)"
           (click)="selectNode(node)"
+          [class.selected]="node.uid === selectedNode?.uid"
         >
           {{ node.id }}
         </div>
@@ -59,11 +75,12 @@ import { FlowService } from '../../core/flow.service.ts';
 
     .canvas {
       position: relative;
-      height: 600px;
-      background: #f0f2f5;
-      overflow: hidden;
+      height: 70vh;
+      background: #f8fafc;
+      border-right: 1px solid #e5e7eb;
     }
 
+    /* SVG layer */
     .edges {
       position: absolute;
       top: 0;
@@ -71,24 +88,36 @@ import { FlowService } from '../../core/flow.service.ts';
       width: 100%;
       height: 100%;
       pointer-events: none;
+      z-index: 1;          /* lower */
     }
 
+    /* Node layer */
     .node {
       position: absolute;
       width: 120px;
       height: 60px;
       padding: 10px;
       background: white;
-      border: 1px solid #ccc;
-      border-radius: 8px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
       cursor: move;
       text-align: center;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      transition: 0.2s ease;
+      z-index: 2;          /* higher */
+    }
+
+    .node:hover {
+      box-shadow: 0 6px 18px rgba(0,0,0,0.15);
     }
 
     .start-node {
       border: 2px solid green;
       background: #eaffea;
+    }
+    .selected {
+      border: 2px solid #2563eb;
+      box-shadow: 0 6px 18px rgba(37, 99, 235, 0.25);
     }
   `]
 })
@@ -133,27 +162,41 @@ export class Canvas implements OnInit {
 
     const edges: any[] = [];
 
-    this.nodes.forEach(sourceNode => {
+    this.nodes.forEach(source => {
 
-      sourceNode.edges.forEach(edge => {
+      source.edges.forEach(edge => {
 
-        const targetNode = nodesMap.get(edge.to_node_id);
+        const target = nodesMap.get(edge.to_node_id);
+        if (!target) return;
 
-        if (targetNode) {
+        // Centers
+        const sx = source.x + NODE_WIDTH / 2;
+        const sy = source.y + NODE_HEIGHT / 2;
 
-          edges.push({
-            id: sourceNode.uid + '-' + edge.to_node_id,
+        const tx = target.x + NODE_WIDTH / 2;
+        const ty = target.y + NODE_HEIGHT / 2;
 
-            x1: sourceNode.x + NODE_WIDTH / 2,
-            y1: sourceNode.y + NODE_HEIGHT / 2,
+        // Direction vector
+        const dx = tx - sx;
+        const dy = ty - sy;
 
-            x2: targetNode.x + NODE_WIDTH / 2,
-            y2: targetNode.y + NODE_HEIGHT / 2,
+        const angle = Math.atan2(dy, dx);
 
-            label: edge.condition
-          });
+        // Offset to stop at edge of box
+        const offsetX = (NODE_WIDTH / 2) * Math.cos(angle);
+        const offsetY = (NODE_HEIGHT / 2) * Math.sin(angle);
 
-        }
+        edges.push({
+          id: source.uid + '-' + edge.to_node_id,
+
+          x1: sx,
+          y1: sy,
+
+          x2: tx - offsetX,
+          y2: ty - offsetY,
+
+          label: edge.condition
+        });
 
       });
 

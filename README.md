@@ -1,16 +1,84 @@
+# Visual Flow Builder (Angular 21)
+
+A lightweight visual flow builder built with Angular 21.
+
+Users can:
+- Add, delete, and drag nodes
+- Connect nodes with conditional transitions
+- Mark one node as the Start node
+- Edit node properties in a sidebar
+- See live JSON preview
+- Import and export flows
+- Detect disconnected nodes
+
+---
+
+## Tech Stack
+
+- Angular 21 (Standalone API)
+- Angular CDK (Drag & Drop)
+- RxJS (Reactive state management)
+- SVG for edge rendering
+
+---
+
+## Architecture Overview
+
+The application uses a centralized state management approach via a FlowService.
+
+Core principles:
+- Immutable updates
+- Reactive streams (BehaviorSubject)
+- Internal UID for stable identity
+- Editable user-facing node ID
+- Validation separated into Validation service
+
+---
+
+## Key Features
+
+### Canvas
+- Draggable nodes (CDK Drag)
+- SVG edge rendering
+- Edge condition labels
+- Start node visual indicator
+- Delete key support
+
+### Sidebar
+- Edit node ID (unique validation)
+- Required description
+- Start node toggle (only one allowed)
+- Add/remove outgoing edges
+
+### JSON Preview
+- Live schema generation
+- Validation errors
+- Copy JSON
+- Download JSON
+- Import JSON
+
+### Validation
+- Unique node IDs
+- Required description
+- Exactly one start node
+- Disconnected node detection
+
+---
+
+## How to Run
+
+```bash
+npm install
+ng serve
+
+Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+
 # FlowBuilder
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.1.4.
 
 ## Development server
 
-To start a local development server, run:
-
-```bash
-ng serve
-```
-
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
 
 ## Code scaffolding
 

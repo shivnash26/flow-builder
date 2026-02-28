@@ -12,17 +12,20 @@ import { JsonPreview } from './components/json-preview/json-preview';
     JsonPreview
   ],
   template: `
-    <div class="layout">
-      <div class="canvas">
+    <div class="app-layout">
+
+      <div class="canvas-area">
         <app-canvas></app-canvas>
       </div>
-      <div class="sidebar">
+
+      <div class="sidebar-area">
         <app-node-sidebar></app-node-sidebar>
       </div>
-    </div>
 
-    <div class="json">
-      <app-json-preview></app-json-preview>
+      <div class="json-area">
+        <app-json-preview></app-json-preview>
+      </div>
+
     </div>
   `,
   styleUrl: './app.scss'

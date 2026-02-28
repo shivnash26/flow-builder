@@ -13,7 +13,7 @@ import { FlowService } from '../../core/flow.service.ts';
       <div class="validation">
         <h4>Validation Errors:</h4>
         <ul>
-          @for (err of errors; track err) {
+          @for (err of errors; track $index) {
             <li>{{ err }}</li>
           }
         </ul>

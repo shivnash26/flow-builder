@@ -3,6 +3,8 @@ import { NodeModel } from '../../models/flow.model';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { FlowService } from '../../core/flow.service.ts';
+import { DestroyRef, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-node-sidebar',
@@ -27,10 +29,10 @@ import { FlowService } from '../../core/flow.service.ts';
             <div class="error">Description is required</div>
           }
 
-          <label>
-            <input type="checkbox" formControlName="isStart" />
-            Start Node
-          </label>
+          <div class="start-row">
+            <label for="startNode">Start Node</label>
+            <input id="startNode" type="checkbox" formControlName="isStart" />
+          </div>
           <hr />
           <h4>Outgoing Edges</h4>
 
@@ -73,14 +75,79 @@ import { FlowService } from '../../core/flow.service.ts';
     }
   `,
   styles: [`
-    label { display: block; margin-top: 10px; }
-    input, textarea { width: 100%; }
-    .error { color: red; font-size: 12px; }
+    :host {
+      display: block;
+      height: 100%;
+      overflow-y: auto;
+    }
+
+    h3 {
+      margin-top: 0;
+    }
+
+    label {
+      display: block;
+      margin-top: 12px;
+      font-weight: 500;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 6px 8px;
+      margin-top: 4px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .error {
+      color: #dc2626;
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    .start-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 16px;
+    }
+
+    .start-row input {
+      width: auto;
+    }
+
+    .edge-block {
+      background: #f8fafc;
+      padding: 10px;
+      border-radius: 8px;
+      margin-top: 12px;
+    }
+
+    button {
+      margin-top: 8px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: none;
+      background: #2563eb;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
   `]
 })
 export class NodeSidebar implements OnInit {
 
   selectedNode: NodeModel | null = null;
+  private destroyRef = inject(DestroyRef);
 
   form: any;
 
@@ -97,26 +164,26 @@ export class NodeSidebar implements OnInit {
     isStart: [false]
   });
 
-    this.flowService.selectedNode$.subscribe(node => {
+  this.flowService.selectedNode$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(node => {
       this.selectedNode = node;
-
       if (node) {
-        this.form.patchValue(node,{ emitEvent: false });
+        this.form.patchValue(node, { emitEvent: false });
       }
     });
 
-    this.form.valueChanges.subscribe((value:any) => {
+  this.form.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value: any) => {
       if (!this.selectedNode) return;
+
+      if (!this.isUniqueId(value.id!)) {
+        this.form.get('id')?.setErrors({ duplicate: true });
+      } else {
+        this.form.get('id')?.setErrors(null);
+      }
 
       const updatedNode: NodeModel = {
         ...this.selectedNode,
         ...value
       };
-
-      if (!this.isUniqueId(value.id!)) {
-        this.form.get('id')?.setErrors({ duplicate: true });
-        return;
-      }
 
       this.flowService.updateNode(updatedNode);
     });
